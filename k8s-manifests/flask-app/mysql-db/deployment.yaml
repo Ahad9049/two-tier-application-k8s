@@ -1,0 +1,26 @@
+#mysql-db deployment manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+  namespace: mysql-db
+  labels:
+    app: mysql-db
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mysql-db
+  template:
+    metadata:
+      labels:
+        app: mysql-db
+    spec:
+      containers:
+      - name: mysql-db
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: admin
+        ports:
+        - containerPort: 3306
