@@ -1,91 +1,212 @@
- 
-# Two-Tier Flask App with MySQL
+# 🐳 Two-Tier Flask App with MySQL on Kubernetes
 
-This is a simple Flask app that interacts with a MySQL database. The app allows users to submit messages, which are then stored in the database and displayed on the frontend.
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-Web%20App-black?logo=flask)
+![MySQL](https://img.shields.io/badge/MySQL-Database-orange?logo=mysql&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-KIND-326CE5?logo=kubernetes&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-EC2-FF9900?logo=amazon-aws&logoColor=white)
 
-## Prerequisites
+A production-ready **two-tier architecture** deploying a Flask web application with a MySQL database on **Kubernetes (KIND)** running inside **AWS EC2**. Credentials are managed securely via **Kubernetes Secrets** — never hardcoded.
 
-Before you begin, make sure you have the following installed:
+---
 
-- Git (optional, for cloning the repository)
-- EC2 insatnce
+## 📐 Architecture Overview
 
-## Setup
+```
+                        ┌─────────────────────────────────────┐
+                        │           AWS EC2 Instance           │
+                        │                                      │
+                        │   ┌──────────────────────────────┐   │
+                        │   │      KIND Kubernetes Cluster  │   │
+                        │   │                              │   │
+                        │   │  ┌──────────┐  ┌──────────┐ │   │
+                        │   │  │  Flask   │  │  MySQL   │ │   │
+                        │   │  │  Pod     │──│  Pod     │ │   │
+                        │   │  │(frontend │  │(database)│ │   │
+                        │   │  │  + API)  │  │          │ │   │
+                        │   │  └──────────┘  └──────────┘ │   │
+                        │   │        │             │        │   │
+                        │   │  ┌─────┴─────────────┴────┐  │   │
+                        │   │  │    Kubernetes Secrets   │  │   │
+                        │   │  │  (DB credentials, keys) │  │   │
+                        │   │  └─────────────────────────┘  │   │
+                        │   └──────────────────────────────┘   │
+                        └─────────────────────────────────────┘
+```
 
-1. Clone this repository (if you haven't already):
+**Tier 1 — Application:** Flask web app serving the frontend UI and REST API  
+**Tier 2 — Data:** MySQL database storing user and transaction data
 
-   ```bash
-   git clone https://github.com/Ahad9049/two-tier-application
-   ```
+---
 
-2. Navigate to the project directory:
+## 🚀 Features
 
-   ```bash
-   cd two-tier-application
-   ```
+- **Kubernetes on KIND** — Full K8s orchestration on a single EC2 instance (no EKS cost)
+- **Kubernetes Secrets** — DB credentials managed securely, never in plain text
+- **Docker multi-stage build** — Optimized, lightweight container image
+- **CI/CD ready** — GitHub integrated for rapid deployment
+- **Cost-effective PoC** — Proves scalability and high availability without cloud overhead
 
-3. Create a `.env` file in the project directory to store your MySQL environment variables:
+---
 
-   ```bash
-   touch .env
-   ```
+## 📁 Project Structure
 
-4. Open the `.env` file and add your MySQL configuration:
+```
+two-tier-application-k8s/
+├── k8s-manifests/          # Kubernetes deployment, service & secret YAML files
+│   ├── flask-deployment.yaml
+│   ├── flask-service.yaml
+│   ├── mysql-deployment.yaml
+│   ├── mysql-service.yaml
+│   └── mysql-secret.yaml
+├── templates/              # Flask HTML templates (Jinja2)
+├── twotier-env/            # Environment configuration files
+├── .env                    # Local environment variables (NOT committed)
+├── Dockerfile              # Docker build instructions for Flask app
+├── Makefile                # Convenience commands for build & deploy
+├── app.py                  # Flask application entry point
+├── kind-config.yaml        # KIND cluster configuration
+├── message.sql             # MySQL schema and seed data
+├── requirements.txt        # Python dependencies
+└── README.md
+```
 
-   ```
-   MYSQL_HOST=localhost
-   MYSQL_USER=root
-   MYSQL_PASSWORD=NewStrongPassword
-   MYSQL_DB=flaskapp
-   ```
+---
 
-## Usage
+## 🛠️ Tech Stack
 
-1. Update System and Install Required Packages:
-
-   ```bash
-   sudo apt update && sudo apt upgrade -y
-   sudo apt install python3-pip python3-venv mysql-server -y
-
-   ```
-
-2. Access the Flask app in your web browser:
- ```bash
-   - http://ec2-instance_ip:5000
-   ```
-
-3. Create the `messages` table in your MySQL database:
-
-   - Use a MySQL client or tool (e.g., phpMyAdmin) to execute the following SQL commands:
-   
-     ```sql
-     CREATE TABLE messages (
-         id INT AUTO_INCREMENT PRIMARY KEY,
-         message TEXT
-     );
-     ```
-4. Run the Flask App:
-
-   ```bash
-   python app.py --host=0.0.0.0 --port=5000
-
-   ```
-5. Interact with the app:
-
-   - Visit http://ec2-instance-ip to see the frontend. You can submit new messages using the form.
+| Layer | Technology |
+|---|---|
+| Web Framework | Flask (Python) |
+| Database | MySQL |
+| Containerization | Docker |
+| Orchestration | Kubernetes (KIND) |
+| Cloud | AWS EC2 |
+| Secret Management | Kubernetes Secrets |
 
 
-## Notes
+---
 
-- Make sure to replace placeholders (e.g., `your_username`, `your_password`, `your_database`) with your actual MySQL configuration.
+## ⚙️ Prerequisites
 
-- This is a basic setup for demonstration purposes. In a production environment, you should follow best practices for security and performance.
+- AWS EC2 instance (Ubuntu 22.04 recommended)
+- Docker installed
+- kubectl installed
+- KIND installed
+- Python 3.11+
 
-- Be cautious when executing SQL queries directly. Validate and sanitize user inputs to prevent vulnerabilities like SQL injection.
+---
 
-##  Notes License
-<pre>This project is open-source and available under the MIT License.</pre>
+## 🏃 Quick Start
 
-## 📬 Contact
-<pre>For questions, feedback, or contributions, feel free to open an issue or submit a pull request.</pre>
+### 1. Clone the repository
 
+```bash
+git clone https://github.com/Ahad9049/two-tier-application-k8s.git
+cd two-tier-application-k8s
+```
+
+### 2. Create the KIND cluster
+
+```bash
+kind create cluster --config kind-config.yaml --name two-tier
+```
+
+### 3. Build and load the Docker image
+
+```bash
+docker build -t flask-app:latest .
+kind load docker-image flask-app:latest --name two-tier
+```
+
+### 4. Create Kubernetes Secrets
+
+```bash
+kubectl create secret generic mysql-secret \
+  --from-literal=MYSQL_ROOT_PASSWORD=<your-password> \
+  --from-literal=MYSQL_DATABASE=<your-db-name> \
+  --from-literal=MYSQL_USER=<your-user> \
+  --from-literal=MYSQL_PASSWORD=<your-password>
+```
+
+### 5. Apply Kubernetes manifests
+
+```bash
+kubectl apply -f k8s-manifests/
+```
+
+### 6. Verify pods are running
+
+```bash
+kubectl get pods
+kubectl get services
+```
+
+### 7. Access the application
+
+```bash
+# Port-forward to access locally
+kubectl port-forward svc/flask-service 5000:5000
+```
+
+Then open: `http://localhost:5000`
+
+---
+
+## 🔐 Security Design
+
+Credentials are **never hardcoded** in any file. All sensitive values are injected at runtime via Kubernetes Secrets:
+
+```yaml
+env:
+  - name: MYSQL_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: mysql-secret
+        key: MYSQL_PASSWORD
+```
+
+> **Rule:** If it's a secret, it lives in a Kubernetes Secret — not in your repo.
+
+---
+
+## 🗄️ Database Setup
+
+The `message.sql` file contains the schema. It is automatically applied when the MySQL pod initializes. To apply manually:
+
+```bash
+kubectl exec -it <mysql-pod-name> -- mysql -u root -p < message.sql
+```
+
+---
+
+## 🧹 Cleanup
+
+```bash
+# Delete all resources
+kubectl delete -f k8s-manifests/
+
+# Delete the KIND cluster
+kind delete cluster --name two-tier
+```
+
+---
+
+## 📌 Industry Use Case
+
+> A fintech startup building a **personal expense tracking platform** needs a PoC on AWS that proves scalability, high availability, and security — while staying cost-effective. This project delivers exactly that.
+
+---
+
+## 👨‍💻 Author
+
+**Abdul Ahad**  
+Junior DevOps Engineer | Docker · Kubernetes · AWS · CI/CD  
+GitHub: [@Ahad9049](https://github.com/Ahad9049)
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
