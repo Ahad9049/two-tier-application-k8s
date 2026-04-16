@@ -54,12 +54,16 @@ A production-ready **two-tier architecture** deploying a Flask web application w
 
 ```
 two-tier-application-k8s/
-├── k8s-manifests/          # Kubernetes deployment, service & secret YAML files
-│   ├── flask-deployment.yaml
-│   ├── flask-service.yaml
-│   ├── mysql-deployment.yaml
-│   ├── mysql-service.yaml
-│   └── mysql-secret.yaml
+├── k8s-manifests/          # Kubernetes manifests organized by component
+│   ├── flask-app/          # Flask application resources
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   ├── mysql-db/           # MySQL database resources
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   └── namespaces/         # Namespace definitions
+│       ├── flask-app.yaml
+│       └── mysql-db.yaml
 ├── templates/              # Flask HTML templates (Jinja2)
 ├── twotier-env/            # Environment configuration files
 ├── .env                    # Local environment variables (NOT committed)
@@ -84,7 +88,6 @@ two-tier-application-k8s/
 | Orchestration | Kubernetes (KIND) |
 | Cloud | AWS EC2 |
 | Secret Management | Kubernetes Secrets |
-
 
 ---
 
@@ -133,7 +136,9 @@ kubectl create secret generic mysql-secret \
 ### 5. Apply Kubernetes manifests
 
 ```bash
-kubectl apply -f k8s-manifests/
+kubectl apply -f k8s-manifests/namespaces/
+kubectl apply -f k8s-manifests/mysql-db/
+kubectl apply -f k8s-manifests/flask-app/
 ```
 
 ### 6. Verify pods are running
@@ -185,7 +190,9 @@ kubectl exec -it <mysql-pod-name> -- mysql -u root -p < message.sql
 
 ```bash
 # Delete all resources
-kubectl delete -f k8s-manifests/
+kubectl delete -f k8s-manifests/flask-app/
+kubectl delete -f k8s-manifests/mysql-db/
+kubectl delete -f k8s-manifests/namespaces/
 
 # Delete the KIND cluster
 kind delete cluster --name two-tier
