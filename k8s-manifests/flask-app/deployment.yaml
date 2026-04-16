@@ -17,7 +17,7 @@ spec:
     spec:
       containers: 
         - name: flask-app
-          image: abdulahad9049/flask-app-k8s:v1.0
+          image: abdulahad9049/flask-app-k8s:v1
           env:
             - name: MYSQL_HOST
               value: "mysql-service.mysql-db.svc.cluster.local"
